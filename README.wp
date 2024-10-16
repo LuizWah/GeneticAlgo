@@ -1,0 +1,3 @@
+-The alg now looks for the best solution based on population density;
+-Generates maps of the population distribution;
+-It can also generate the map of the solution;
