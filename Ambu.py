@@ -1,17 +1,31 @@
+
 import random
 import DADOS
+import math
+
+import pandas as pd
+import matplotlib.pyplot as plt
+import geopandas as gpd
+import shapely.geometry 
+
+
+
 
 MUTATION_RATE = 0.1
-POPULATION_NUMBER = 150
+POPULATION_NUMBER = 300
 NUMBER_POSIBLE_LOCATIONS = 40
-ITERATIONS = 2000
+ITERATIONS = 200
 PROBLEMA = [] 
 ITERATION_UNTIL_NATURAL_DISASTER = 2000 
 PERCENTAGE_OF_DEATHS_BY_DISASTER = 20
+DISTANCE_MATRIX = []
 
-NUMERO_AMBU_TIPO_A = 20
-NUMERO_AMBU_TIPO_B = 20
 
+
+NUMERO_AMBU_TIPO_A = 10
+NUMERO_AMBU_TIPO_B = 10
+RAIO = 200
+PI = 3.14
 
 class Local:
     def __init__(self, *args):
@@ -19,14 +33,8 @@ class Local:
         self.position_x = args[1] 
         self.position_y = args[2]
         self.demand = args[3]
-        
-def prepare_locations():
-    keys = list(DADOS.PONTOS)   
-    for i in range(NUMBER_POSIBLE_LOCATIONS):    
-        new_local = Local(keys[i], DADOS.PONTOS[keys[i]][0], DADOS.PONTOS[keys[i]][1], DADOS.PONTOS[keys[i]][2])
-        PROBLEMA.append(new_local)
-        
-        
+       
+      
 class Solution:
     def __init__(self):
         self.xA = []
@@ -51,8 +59,8 @@ def generate_number(start, end):
 
 def create_solution():
     new_solution = Solution()
-    new_solution.number_type_A = generate_number(0, NUMERO_AMBU_TIPO_A )
-    new_solution.number_type_B = generate_number(0, NUMERO_AMBU_TIPO_B)
+    new_solution.number_type_A = generate_number(5, NUMERO_AMBU_TIPO_A)
+    new_solution.number_type_B = generate_number(5, NUMERO_AMBU_TIPO_B)
     #print(f"\nnumber_type_A {new_solution.number_type_A}, number_type_B {new_solution.number_type_B}\n")
     for i in range(new_solution.number_type_A):
         new_index = generate_number(0, NUMBER_POSIBLE_LOCATIONS - 1)
@@ -78,19 +86,95 @@ def create_solution():
         else:          
             new_solution.xB[new_index] = '1'
 
-    return new_solution
-             
-def calculate_rank(solution):
-    for i in range(NUMBER_POSIBLE_LOCATIONS):
-        if(solution.xA[i] == solution.xB[i] == '1'):
-            solution.rank += PROBLEMA[i].demand
-        elif(solution.xB[i] == '1'):    
-            solution.rank += PROBLEMA[i].demand*0.5
-        #elif(solution.xA[i] == '1' and solution.xB[i] == '#'):  
-            #solution.rank += (PROBLEMA[i].demand)*0.5
-        #elif(solution.xA[i] == '#' and solution.xB[i] == '1'):
-            #solution.rank += (PROBLEMA[i].demand)*0.5
+    return new_solution       
         
+def prepare_locations():
+    keys = list(DADOS.PONTOS)   
+    for i in range(NUMBER_POSIBLE_LOCATIONS):    
+        new_local = Local(keys[i], DADOS.PONTOS[keys[i]][0], DADOS.PONTOS[keys[i]][1], DADOS.PONTOS[keys[i]][2])
+        PROBLEMA.append(new_local)
+
+
+
+def calc_distance(points_index_1, points_index_2):
+    x = pow((PROBLEMA[points_index_1].position_x - PROBLEMA[points_index_2].position_x), 2)     
+    y = pow((PROBLEMA[points_index_1].position_y - PROBLEMA[points_index_2].position_y), 2)     
+    distance = pow((x + y), 0.5)
+    
+    return distance     
+       
+def create_distance_matrix():
+    for i in range(NUMBER_POSIBLE_LOCATIONS):
+        distances = []
+        for j in range(NUMBER_POSIBLE_LOCATIONS):
+            distances.append(calc_distance(i, j))
+        DISTANCE_MATRIX.append(distances)  
+       
+def get_intersections(x0, y0, x1, y1):
+    d=math.sqrt((x1-x0)**2 + (y1-y0)**2)
+    
+    a=(RAIO**2-RAIO**2+d**2)/(2*d)
+    h=math.sqrt(RAIO**2-a**2)
+    x2=x0+a*(x1-x0)/d   
+    y2=y0+a*(y1-y0)/d   
+    x3=x2+h*(y1-y0)/d     
+    y3=y2-h*(x1-x0)/d 
+
+    x4=x2-h*(y1-y0)/d
+    y4=y2+h*(x1-x0)/d
+        
+    return (x3, y3, x4, y4)       
+       
+                   
+def calc_penalties(solution):
+    penalty = 0
+    for i in range(NUMBER_POSIBLE_LOCATIONS):
+        if(solution.xB[i] == '1'):#condition to satisfy
+            for j in range(NUMBER_POSIBLE_LOCATIONS):
+                if(DISTANCE_MATRIX[i][j] < 2*RAIO and i != j and solution.xB[j] == '1'):
+                    #calc coords pontos intercesão
+                    inter_points = get_intersections(PROBLEMA[i].position_x, PROBLEMA[i].position_y, PROBLEMA[j].position_x, PROBLEMA[j].position_y)
+                    #calc corda
+                    corda = pow(pow(inter_points[0] - inter_points[2], 2) + pow(inter_points[1] - inter_points[3],2),0.5)
+                    
+                    #calc setor
+                    side1 =  2*(RAIO*RAIO) - (corda*corda)
+                    side2 = 2*(RAIO*RAIO)
+                    theta = math.acos(side1/side2)
+                    
+                    #print(theta)
+                    #print("------")
+                    #print(side1/side2)
+                    #print("------")
+                    setor = (theta*math.pi*(RAIO*RAIO))/(2*math.pi)
+                    
+                    #calc triangulo
+                    altura = pow(RAIO*RAIO - corda*corda/4, 0.5)
+                    triangulo = (corda*altura)/2
+                    #calc segmento
+                    segmento = setor - triangulo
+                    penalty += 2*segmento  
+                    
+    print(f"penaçlty === {penalty}")                  
+    return penalty                          
+                
+           
+def calc_area(solution): 
+    number_location_satisfied = 0
+    for i in range(NUMBER_POSIBLE_LOCATIONS):
+        if(solution.xB[i] == solution.xA[i] == '1'):#condition to satisfy
+            number_location_satisfied += 1
+        elif(solution.xB[i] == '1'):
+            number_location_satisfied += 0.5    
+    area = math.pi*RAIO*RAIO*number_location_satisfied
+    return area
+      
+def calculate_rank(solution):
+    solution.rank = calc_area(solution) - calc_penalties(solution)  
+  
+  
+  
+  
 def choose_parent(population):
     temp_pop = []
     sum_rank = 0
@@ -162,9 +246,10 @@ def crossover(base, guia):
     return nova
 
 def main():
-    #random.seed(8031)
+    #random.seed(8)
+    #testing 1 , 5 , 4
     prepare_locations()
-    
+    create_distance_matrix()
     population = []
     for i in range(POPULATION_NUMBER):
         new_solution = create_solution()
@@ -241,8 +326,102 @@ def main():
     #print("---------------------")
     #print(new_child.rank)
 
+    circles = []
 
+    for i in range(NUMBER_POSIBLE_LOCATIONS):
+        if(best_solution_so_far.xB[i] == '1'):
+            circles.append(plt.Circle((PROBLEMA[i].position_x, PROBLEMA[i].position_y), RAIO, color='b', fill=False))
+
+
+    fig, ax = plt.subplots()  
+
+    ax.set_xlim((-1000, 1000))
+    ax.set_ylim((-1000, 1000))
+
+    for i in range(len(circles)):
+        ax.add_artist(circles[i])
+        #ax2.add_artist(points[i])
+
+    plt.gca().set_aspect('equal', adjustable='box')
+
+    plt.show()
 
 
 main()
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+#main           
+# prepare_locations()           
+# create_distance_matrix()
+
+# sol = create_solution()
+# calculate_rank_2(sol)
+
+# print(sol.rank)  
+# print(sol.xB)
+
+#everything below is plotting
+
+
+# circles = []
+
+# for i in range(NUMBER_POSIBLE_LOCATIONS):
+#     if(sol.xB[i] == '1'):
+#         circles.append(plt.Circle((PROBLEMA[i].position_x, PROBLEMA[i].position_y), RAIO, color='b', fill=False))
+
+
+# fig, ax = plt.subplots()  
+
+# ax.set_xlim((-1000, 1000))
+# ax.set_ylim((-1000, 1000))
+
+# for i in range(len(circles)):
+#     ax.add_artist(circles[i])
+#     #ax2.add_artist(points[i])
+
+# plt.gca().set_aspect('equal', adjustable='box')
+
+# plt.show()
+
 
