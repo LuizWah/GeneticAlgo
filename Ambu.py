@@ -84,6 +84,8 @@ def calculate_rank(solution):
     for i in range(NUMBER_POSIBLE_LOCATIONS):
         if(solution.xA[i] == solution.xB[i] == '1'):
             solution.rank += PROBLEMA[i].demand
+        elif(solution.xB[i] == '1'):    
+            solution.rank += PROBLEMA[i].demand*0.5
         #elif(solution.xA[i] == '1' and solution.xB[i] == '#'):  
             #solution.rank += (PROBLEMA[i].demand)*0.5
         #elif(solution.xA[i] == '#' and solution.xB[i] == '1'):
@@ -160,7 +162,7 @@ def crossover(base, guia):
     return nova
 
 def main():
-    #random.seed(6)
+    #random.seed(8031)
     prepare_locations()
     
     population = []
@@ -185,11 +187,11 @@ def main():
         new_pop = []
 
         PERCENTAGE_ELITISM = 20
-        PERCENTAGE_BAD_SOLUTION = 20
-        PERCENTAGE_NEW_SOLUTIONS = 20
+        PERCENTAGE_BAD_SOLUTION = 10
+        PERCENTAGE_NEW_SOLUTIONS = 30
         PERCENTAGE_CHILD_SOLUTIONS = 40
-        #20 20 20 40 = 1-17 2-14 3-16 4-17 5-15 6-16 7-14 8-14 9-14 10-14
-
+        # 20 10 30 40 1-16.5 2-18 3-16 4-17.5 5-19 6-16 7-15 8-18.5 9-16.5 10-16.5
+       
         amount_elite_ind = int((PERCENTAGE_ELITISM * POPULATION_NUMBER)/100)
         for i in range(amount_elite_ind):
             new_pop.append(population[POPULATION_NUMBER - i - 1])
@@ -228,10 +230,10 @@ def main():
         new_pop.sort()
         population = new_pop
 
+       
     print(f"\n----------------------\nRANKING OF BEST SOLUTION: {best_solution_so_far.rank}\n----------------------\n")
     print(f"Vetor xA: {best_solution_so_far.xA}\n")
-    print(f"Vetor xB: {best_solution_so_far.xB}\n")    
-
+    print(f"Vetor xB: {best_solution_so_far.xB}\n")
     #new_child = crossover(population[POPULATION_NUMBER - 1], population[POPULATION_NUMBER - 2])
     #print(new_child.xA)
     #print("---------------------")
