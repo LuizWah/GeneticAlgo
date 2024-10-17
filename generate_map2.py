@@ -1,8 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import geopandas as gpd
-from shapely.geometry import Point, Polygon  
-
+from shapely.geometry import Point, Polygon, LineString  
 
 
 # set the filepath and load
@@ -17,8 +16,8 @@ map_df = gpd.read_file(shp_path)
 
 #opening the csv(.shp) file which contains the data to be plotted on the map
 df = gpd.read_file("shape//IBGE_Pop_Dom_2010.shp")
-df.head()
 
+df.head()
 
 #selecting the columns required
 df = df[["Pop_setor","Dom_setor"]]
@@ -45,8 +44,8 @@ fig, ax = plt.subplots(1, figsize=(10, 6))
 
 
 pontos = gpd.read_file("shape//Equipamentos_Saude_2023.shp")
-pontos = pontos.to_crs(map_df.crs)
 
+pontos = pontos.to_crs("wgs84")
 base = merged.plot(column=variable, cmap='Greens', linewidth=0.8, ax=ax, edgecolor='0.8', legend=True, missing_kwds={
         "color": "lightgrey",
         "edgecolor": "red",
@@ -55,12 +54,30 @@ base = merged.plot(column=variable, cmap='Greens', linewidth=0.8, ax=ax, edgecol
     },)
 
 
-
 ax.axis("off")
 
 
-
 pontos.plot(ax=ax, marker='o', color='blue', markersize=5)
+
+centroids = map_df.centroid
+centroids = centroids.to_crs("wgs84")
+
+# f = open("DADOS_3.py", "a")
+# g = open("DADOS_2.py")
+# last_string = g.readlines()
+# string = "0"
+# for i in range(413): 
+#     if(i > 0):
+#         string =  (last_string[i].strip('\n'))[: len(last_string[i]) - 3] + str(data_for_map["P_setor"][i -1]).strip('\n') + "],"
+#         f.write(f"{string}")
+#         f.write("\n")
+    
+# f.close()
+
+
+
+
+centroids.plot(ax=ax, marker='o', color='red', markersize=5)
 
 plt.show()
 
