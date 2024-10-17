@@ -1,3 +1,3 @@
--The alg now looks for the best solution based on population density;
--Generates maps of the population distribution;
--It can also generate the map of the solution;
+-The fitness of each solution is calculated based on the amount of points of interest 
+in the radius of a selected point from DADOS;
+-The base radius used was 200, and is an arbitrary range;
