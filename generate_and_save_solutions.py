@@ -8,7 +8,7 @@ def make_solutions(NUMBER_SOLUTIONS):
     for i in range(NUMBER_SOLUTIONS):
         start = time.time()
         
-        name_sol_file = "1hsolution" + str(i)
+        name_sol_file = "30min-solution" + str(i + 1)
 
         solution = Alg_genetico.main()
 
