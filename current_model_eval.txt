@@ -1,0 +1,11 @@
+CURRENT SOLUTION 15min 
+rank: 36128.27500000002
+Percentage of demand satisfied = 16.423224342618926%
+
+CURRENT SOLUTION 30min
+rank: 93297.40500000013
+Percentage of demand satisfied = 42.411219824339184%
+
+CURRENT SOLUTION 1h
+rank: 171802.0000000003
+Percentage of demand satisfied = 78.09791052882042%

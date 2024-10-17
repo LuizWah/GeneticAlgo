@@ -11,16 +11,17 @@ import shapely.geometry
 
 
 
-POPULATION_NUMBER = 100
-ITERATIONS = 5
+POPULATION_NUMBER = 1
+ITERATIONS = 1
 
 NUMBER_LOCATIONS = len(DP)
 NUMBER_AMBUS_TYPE_A = 1
 NUMBER_AMBUS_TYPE_B = 3
 LOCATIONS = [] 
 DISTANCE_MATRIX = []
-RAIO = 0.0056
+RAIO = 0.0336
 #15min, 30min, 1h
+#0.0084, 0.0168, 0.0336
 def random_number(start, end):
     return random.randrange(start, end)
 
@@ -217,7 +218,8 @@ def main():
 
         amount_new_ind = int((PERCENTAGE_CHILD_SOLUTIONS * POPULATION_NUMBER)/100)
         for i in range(amount_new_ind):
-            parent1 = choose_parent(population)
+            if(ITERATIONS > (ITERATIONS*0.5)/100 ):
+                parent1 = best_solution_so_far
             parent2 = choose_parent(population)
             
             new_solution = crossover(parent1, parent2)
@@ -238,70 +240,51 @@ def main():
     #print(new_child.rank)
     return best_solution_so_far
 
+def plot_sol(best_sol, sol_name):
+    # set the filepath and load
+    shp_path = "shape//Face_de_Quadra_2023.shp"
+    #reading the file stored in variable fp
+    map_df = gpd.read_file(shp_path)
+    # check data type so we can see that this is not a normal dataframe, but a GEOdataframe
 
-best_sol = main()
-
-
-# set the filepath and load
-shp_path = "shape//Face_de_Quadra_2023.shp"
-#reading the file stored in variable fp
-map_df = gpd.read_file(shp_path)
-# check data type so we can see that this is not a normal dataframe, but a GEOdataframe
-
-#print(map_df.sample(5))
+    #print(map_df.sample(5))
 
 
 
-#opening the csv(.shp) file which contains the data to be plotted on the map
-df = gpd.read_file("shape//Face_de_Quadra_2023.shp")
+    #opening the csv(.shp) file which contains the data to be plotted on the map
+    df = gpd.read_file("shape//Face_de_Quadra_2023.shp")
 
-df.head()
-
-
-
-fig, ax = plt.subplots(1, figsize=(10, 6))
-
-
-ax.axis("off")
+    df.head()
 
 
 
-circles = []
-
-for i in range(NUMBER_LOCATIONS):
-    if(best_sol.xA[i] == 1 or best_sol.xB[i] == 1):
-        circles.append(plt.Circle((LOCATIONS[i].coord_x, LOCATIONS[i].coord_y), RAIO, color='b', fill=False))
+    fig, ax = plt.subplots(1, figsize=(10, 6))
 
 
-for i in range(len(circles)):
-    ax.add_artist(circles[i])
-    #ax2.add_artist(points[i])  
-  
-  
-  
-
-centroids = map_df.centroid
-centroids = centroids.to_crs("wgs84")
-
-centroids.plot(ax=ax, marker='o', color='red', markersize=5)
-
-plt.show()
-  
-  
+    ax.axis("off")
 
 
 
+    circles = []
+
+    for i in range(NUMBER_LOCATIONS):
+        if(best_sol.xA[i] == 1 or best_sol.xB[i] == 1):
+            circles.append(plt.Circle((LOCATIONS[i].coord_x, LOCATIONS[i].coord_y), RAIO, color='b', fill=False))
 
 
+    for i in range(len(circles)):
+        ax.add_artist(circles[i])
+        #ax2.add_artist(points[i])  
+    
+    
+    
 
+    centroids = map_df.centroid
+    centroids = centroids.to_crs("wgs84")
 
+    centroids.plot(ax=ax, marker='o', color='red', markersize=5, alpha=0.5) 
 
-
-
-
-
-
-
+    plt.savefig(f"solutions_images/{sol_name}.svg")
 
 
 # random.seed()#669
