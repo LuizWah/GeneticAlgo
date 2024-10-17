@@ -1,4 +1,3 @@
-
 import random
 import DADOS
 import math
@@ -13,19 +12,19 @@ import shapely.geometry
 
 MUTATION_RATE = 0.1
 POPULATION_NUMBER = 300
-NUMBER_POSIBLE_LOCATIONS = 40
+NUMBER_POSIBLE_LOCATIONS = 55
 ITERATIONS = 200
 PROBLEMA = [] 
 ITERATION_UNTIL_NATURAL_DISASTER = 2000 
 PERCENTAGE_OF_DEATHS_BY_DISASTER = 20
 DISTANCE_MATRIX = []
 
+NUMERO_AMBU_TIPO_A = 15
+NUMERO_AMBU_TIPO_B = 15
 
-
-NUMERO_AMBU_TIPO_A = 10
-NUMERO_AMBU_TIPO_B = 10
-RAIO = 200
-PI = 3.14
+TEMPO = 15#minutos
+RAIO = 0.0056
+VELOCIDADE = 36#km/h
 
 class Local:
     def __init__(self, *args):
@@ -155,7 +154,7 @@ def calc_penalties(solution):
                     segmento = setor - triangulo
                     penalty += 2*segmento  
                     
-    print(f"penaçlty === {penalty}")                  
+    #print(f"penaçlty === {penalty}")                  
     return penalty                          
                 
            
@@ -246,7 +245,7 @@ def crossover(base, guia):
     return nova
 
 def main():
-    #random.seed(8)
+    random.seed(12)
     #testing 1 , 5 , 4
     prepare_locations()
     create_distance_matrix()
@@ -335,8 +334,8 @@ def main():
 
     fig, ax = plt.subplots()  
 
-    ax.set_xlim((-1000, 1000))
-    ax.set_ylim((-1000, 1000))
+    ax.set_xlim((-46.2, -45.77))
+    ax.set_ylim((-23.4, -23.16))
 
     for i in range(len(circles)):
         ax.add_artist(circles[i])
