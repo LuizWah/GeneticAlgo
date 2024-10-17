@@ -1,19 +1,19 @@
-import DADOS
-import DADOS_2 
+import SAMUS
+import POSSIBLE 
 
 
 RAIO = 0.0056
 
 AMBUS = []
-NUMBER_DISTRICTS = 412
+NUMBER_DISTRICTS = len(POSSIBLE.DISTRICTS_POINTS)
 DISTRICTS =[]
 DISTRICTS_SATISFACTION = [0]*NUMBER_DISTRICTS
-NUMBER_POSIBLE_LOCATIONS = 55
+NUMBER_POSIBLE_LOCATIONS = len(SAMUS.PONTOS)
 
 class ambu:
     def __init__(self, *args):
         self.id = args[0]
-        self.position_x = args[1] 
+        self.position_x = args[1]
         self.position_y = args[2]
 
 class district:
@@ -24,15 +24,15 @@ class district:
         self.demand = args[3]
 
 def prepare_ambus():
-    keys = list(DADOS.PONTOS)   
+    keys = list(SAMUS.PONTOS)   
     for i in range(NUMBER_POSIBLE_LOCATIONS):    
-        new_local = ambu(keys[i], DADOS.PONTOS[keys[i]][0], DADOS.PONTOS[keys[i]][1])
+        new_local = ambu(keys[i], SAMUS.PONTOS[keys[i]][0], SAMUS.PONTOS[keys[i]][1])
         AMBUS.append(new_local)
 
 def prepare_district():
-    keys = list(DADOS_2.DISTRICTS_POINTS)   
+    keys = list(POSSIBLE.DISTRICTS_POINTS)   
     for i in range(NUMBER_DISTRICTS):    
-        new_district = district(keys[i], DADOS_2.DISTRICTS_POINTS[keys[i]][0], DADOS_2.DISTRICTS_POINTS[keys[i]][1], DADOS_2.DISTRICTS_POINTS[keys[i]][2] )
+        new_district = district(keys[i], POSSIBLE.DISTRICTS_POINTS[keys[i]][0], POSSIBLE.DISTRICTS_POINTS[keys[i]][1], POSSIBLE.DISTRICTS_POINTS[keys[i]][2] )
         DISTRICTS.append(new_district)
 
 
@@ -49,6 +49,7 @@ def max_satisfaction():
     for i in range(NUMBER_DISTRICTS):
         if(DISTRICTS[i].demand != "nan"):
             sat += DISTRICTS[i].demand
+    print(sat)        
     return sat        
 
 
@@ -73,6 +74,6 @@ print(satisfaction)
 
 print(f"Percentage of demand satisfied = {(satisfaction/max_satisfaction())*100}%")
 
-
+print(max_satisfaction())
 
 
